@@ -61,6 +61,10 @@ update msg model =
             ( { model | time = posix, zone = zone }, Cmd.none )
 
 
+timeLeft model =
+    Time.millisToPosix (4895612 - Time.posixToMillis model.time)
+
+
 backgroundColor : Model -> String
 backgroundColor model =
     let
@@ -108,22 +112,44 @@ backgroundColor model =
         ++ ")"
 
 
+secondInt : Model -> Int
 secondInt model =
-    Time.toSecond model.zone model.time
+    Time.toSecond model.zone (timeLeft model)
 
 
 view : Model -> Html.Html Msg
 view model =
     let
+        week =
+            String.fromInt <| Basics.floor (toFloat day / 7)
+
+        day =
+            Time.toDay model.zone (timeLeft model)
+
         hour =
-            String.fromInt (Time.toHour model.zone model.time)
+            String.fromInt (Time.toHour model.zone (timeLeft model))
 
         minute =
-            String.fromInt (Time.toMinute model.zone model.time)
+            String.fromInt (Time.toMinute model.zone (timeLeft model))
 
         second =
-            String.fromInt (secondInt model)
+            String.fromInt (Time.toSecond model.zone (timeLeft model))
     in
-    Html.div [ style "color" (backgroundColor model) ]
-        [ Html.text <| "The time now is: " ++ hour ++ ":" ++ minute ++ ":" ++ second
+    Html.div []
+        [ Html.div [ style "color" (backgroundColor model) ]
+            [ Html.text "Time until kickoff ~! \n "
+            ]
+        , Html.div []
+            [ Html.text <|
+                week
+                    ++ " weeks "
+                    ++ String.fromInt day
+                    ++ " days "
+                    ++ hour
+                    ++ " hours "
+                    ++ minute
+                    ++ " minutes "
+                    ++ second
+                    ++ " seconds"
+            ]
         ]
