@@ -62,7 +62,7 @@ update msg model =
 
 
 timeLeft model =
-    Time.millisToPosix (4895612 - Time.posixToMillis model.time)
+    Time.millisToPosix (1578148200 - Time.posixToMillis model.time)
 
 
 backgroundColor : Model -> String
