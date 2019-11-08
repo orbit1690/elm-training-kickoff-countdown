@@ -91,4 +91,4 @@ view model =
         colorH =
             String.fromInt (255 - Time.toHour model.zone model.time)
     in
-    h1 [ style "color" ("rgb(" ++ colorH ++ "," ++ minute ++ "," ++ second ++ ")") ] [ text (hour ++ ":" ++ minute ++ ":" ++ second) ]
+    h1 [ style "color" ("rgb(" ++ hour ++ "," ++ minute ++ "," ++ second ++ ")") ] [ text (hour ++ ":" ++ minute ++ ":" ++ second) ]
