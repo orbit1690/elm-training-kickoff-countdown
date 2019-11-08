@@ -1,4 +1,4 @@
-module Clock exposing (main)
+module CountDown exposing (main)
 
 import Browser
 import Html
@@ -35,6 +35,16 @@ type alias Model =
     }
 
 
+kickOffMillis : Int
+kickOffMillis =
+    1578148200000
+
+
+millisLeft : Model -> Int
+millisLeft model =
+    kickOffMillis - Time.posixToMillis model.time
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Time.every 1000 Tick
@@ -61,95 +71,103 @@ update msg model =
             ( { model | time = posix, zone = zone }, Cmd.none )
 
 
-timeLeft model =
-    Time.millisToPosix (1578148200 - Time.posixToMillis model.time)
-
-
-backgroundColor : Model -> String
-backgroundColor model =
+backgroundColor : Model -> Int -> String
+backgroundColor model sec =
     let
-        sec =
-            toFloat (secondInt model)
+        partOfMinute : Int
+        partOfMinute =
+            sec // 20
 
-        secondR =
-            if sec < 40 then
-                if sec < 20 then
-                    sec
+        rgbCalc : Int -> Int -> Int
+        rgbCalc up down =
+            if partOfMinute == up then
+                sec - (up * 20)
 
-                else
-                    40 - sec
-
-            else
-                0
-
-        secondG =
-            if 20 <= sec && sec <= 59 then
-                if sec < 40 then
-                    sec - 20
-
-                else
-                    60 - sec
+            else if partOfMinute == (down - 1) then
+                (down * 20) - sec
 
             else
                 0
 
-        secondB =
-            if 40 <= sec then
-                sec - 40
+        red : Float
+        red =
+            toFloat <| rgbCalc 0 2
 
-            else if sec < 20 then
-                20 - sec
+        green : Float
+        green =
+            toFloat <| rgbCalc 1 3
 
-            else
-                0
+        blue : Float
+        blue =
+            toFloat <| rgbCalc 2 1
     in
     "rgb("
-        ++ String.fromFloat (secondR * 12.75)
+        ++ String.fromFloat (red * 12.75)
         ++ ","
-        ++ String.fromFloat (secondG * 12.75)
+        ++ String.fromFloat (green * 12.75)
         ++ ","
-        ++ String.fromFloat (secondB * 12.75)
+        ++ String.fromFloat (blue * 12.75)
         ++ ")"
-
-
-secondInt : Model -> Int
-secondInt model =
-    Time.toSecond model.zone (timeLeft model)
 
 
 view : Model -> Html.Html Msg
 view model =
     let
-        week =
-            String.fromInt <| Basics.floor (toFloat day / 7)
+        millis : Int
+        millis =
+            modBy 1000 (millisLeft model)
 
-        day =
-            Time.toDay model.zone (timeLeft model)
+        secondsLeft : Int
+        secondsLeft =
+            millisLeft model // 1000
 
-        hour =
-            String.fromInt (Time.toHour model.zone (timeLeft model))
+        seconds : Int
+        seconds =
+            modBy 60 secondsLeft
 
-        minute =
-            String.fromInt (Time.toMinute model.zone (timeLeft model))
+        minutesLeft : Int
+        minutesLeft =
+            secondsLeft // 60
 
-        second =
-            String.fromInt (Time.toSecond model.zone (timeLeft model))
+        minutes : Int
+        minutes =
+            modBy 60 minutesLeft
+
+        hoursLeft : Int
+        hoursLeft =
+            minutesLeft // 60
+
+        hours : Int
+        hours =
+            modBy 24 hoursLeft
+
+        daysLeft : Int
+        daysLeft =
+            hoursLeft // 24
+
+        days : Int
+        days =
+            modBy 7 daysLeft
+
+        weeksLeft : Int
+        weeksLeft =
+            daysLeft // 7
     in
     Html.div []
-        [ Html.div [ style "color" (backgroundColor model) ]
-            [ Html.text "Time until kickoff ~! \n "
+        [ Html.div [ style "color" (backgroundColor model seconds) ]
+            [ Html.text "Time until kickoff ~!"
             ]
         , Html.div []
             [ Html.text <|
-                week
+                String.fromInt weeksLeft
                     ++ " weeks "
-                    ++ String.fromInt day
+                    ++ String.fromInt days
                     ++ " days "
-                    ++ hour
+                    ++ String.fromInt hours
                     ++ " hours "
-                    ++ minute
+                    ++ String.fromInt minutes
                     ++ " minutes "
-                    ++ second
+                    ++ String.fromInt seconds
                     ++ " seconds"
             ]
         ]
