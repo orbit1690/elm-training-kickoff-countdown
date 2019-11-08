@@ -12,7 +12,7 @@ main =
     Browser.element
         { init = init
         , view = view
-        , update = update
+        , update = \msg model -> ( update msg model, Cmd.none )
         , subscriptions = subscriptions
         }
 
@@ -66,20 +66,16 @@ view model =
         ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         ChangeTime newTime ->
-            ( { model | time = newTime }
-            , Cmd.none
-            )
+            { model | time = newTime }
 
         ChangeTimeZone newZone ->
-            ( { model | zone = newZone }
-            , Cmd.none
-            )
+            { model | zone = newZone }
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions always =
     Time.every 1000 ChangeTime
