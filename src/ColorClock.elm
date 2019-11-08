@@ -58,11 +58,11 @@ view model =
         , style "height" "100%"
         ]
         [ div
-            [ style "background-color" ("rgb(" ++ hour ++ ", " ++ minute ++ ", " ++ second)
+            [ style "background-color" <| String.concat [ "rgb(", hour, ", ", minute, ", ", second ]
             , style "width" "10%"
             , style "height" "10%"
             ]
-            [ Html.text (hour ++ " : " ++ minute ++ " : " ++ second) ]
+            [ Html.text <| String.concat [ hour, " : ", minute, " : ", second ] ]
         ]
 
 
