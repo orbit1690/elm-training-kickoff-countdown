@@ -15,7 +15,7 @@ type alias Model =
 
 
 init : flags -> ( Model, Cmd Msg )
-init _ =
+init always =
     ( { current = Time.millisToPosix 0
       , zone = Time.utc
       , target = Time.millisToPosix 1578150000000
@@ -44,28 +44,44 @@ view model =
         millisToKickOff =
             dateTimeMillis - currentMillis
 
-        daysToKickOff : Int
-        daysToKickOff =
-            millisToKickOff // (60 ^ 2 * 24 * 1000)
+        secondsToKickOff : Int
+        secondsToKickOff =
+            millisToKickOff // 1000
 
-        hoursToKickOff : Int
-        hoursToKickOff =
-            modBy (60 ^ 2 * 24 * 1000) millisToKickOff // (1000 * 60 ^ 2)
+        clockSeconds : String
+        clockSeconds =
+            String.fromInt <| modBy 60 secondsToKickOff
 
         minutesToKickOff : Int
         minutesToKickOff =
-            modBy (1000 * 60 ^ 2) millisToKickOff // (1000 * 60)
+            secondsToKickOff // 60
 
-        secondsToKickOff : Int
-        secondsToKickOff =
-            modBy (1000 * 60) millisToKickOff // 1000
+        clockMinutes : String
+        clockMinutes =
+            String.fromInt <| modBy 60 minutesToKickOff
+
+        hoursToKickOff : Int
+        hoursToKickOff =
+            minutesToKickOff // 60
+
+        clockHours : String
+        clockHours =
+            String.fromInt <| modBy 24 minutesToKickOff
+
+        daysToKickOff : Int
+        daysToKickOff =
+            hoursToKickOff // 24
+
+        clockDays : String
+        clockDays =
+            String.fromInt <| modBy 365 daysToKickOff
     in
     div
         [ style "position" "absolute"
         , style "width" "90%"
         , style "height" "90%"
         ]
-        [ Html.text (String.fromInt daysToKickOff ++ ":" ++ (String.fromInt hoursToKickOff ++ ":") ++ String.fromInt minutesToKickOff ++ ":" ++ String.fromInt secondsToKickOff) ]
+        [ Html.text <| String.concat <| [ clockDays, " : ", clockHours, " : ", clockMinutes ++ " : ", clockSeconds ] ]
 
 
 update : Msg -> Model -> Model
