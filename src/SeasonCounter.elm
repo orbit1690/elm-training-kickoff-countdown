@@ -1,4 +1,4 @@
-module SeasonCounter exposing (..)
+module SeasonCounter exposing (Model, Msg, init, update, view)
 
 import Browser
 import Html exposing (div, h2, text)
