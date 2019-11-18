@@ -1,11 +1,11 @@
-module ClockCountDown exposing (Model, Msg(..), init, main, subscriptions, update, view)
+module ClockCountDown exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser
 import Html exposing (..)
 import Task
 import Time
 
-
+main : Program () Model Msg 
 main =
     Browser.element
         { init = init
@@ -23,17 +23,13 @@ type alias Model =
 
 type Msg
     = Tick Time.Posix
-    | AdjustTimeZone Time.Zone
     | CurrTime Time.Posix
 
 
 init : () -> ( Model, Cmd Msg )
-init _ =
+init _=
     ( Model Time.utc (Time.millisToPosix 0)
-    , Cmd.batch
-        [ Task.perform AdjustTimeZone Time.here
-        , Task.perform CurrTime Time.now
-        ]
+    ,Task.perform CurrTime Time.now
     )
 
 
@@ -42,11 +38,6 @@ update msg model =
     case msg of
         Tick newTime ->
             ( { model | time = newTime }
-            , Cmd.none
-            )
-
-        AdjustTimeZone newZone ->
-            ( { model | zone = newZone }
             , Cmd.none
             )
 
