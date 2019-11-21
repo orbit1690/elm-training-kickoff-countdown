@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), init, main, subscriptions, update, view)
+module Countdown exposing (Model, init, subscriptions, update, view)
 
 import Browser
 import Html
@@ -9,17 +9,16 @@ import Time
 main : Program () Model Msg
 main =
     Browser.element
-        { init = init
+        { init = always init
         , update = update
         , view = view
-        , subscriptions = subscriptions
+        , subscriptions = always subscriptions
         }
 
 
 type Msg
     = Tick Time.Posix
     | AdjustTimeZone Time.Zone
-    | CurrentTime Time.Posix
 
 
 type alias Model =
@@ -28,12 +27,12 @@ type alias Model =
     }
 
 
-init : flags -> ( Model, Cmd Msg )
-init _ =
+init : ( Model, Cmd Msg )
+init =
     ( Model Time.utc (Time.millisToPosix 0)
     , Cmd.batch
         [ Task.perform AdjustTimeZone Time.here
-        , Task.perform CurrentTime Time.now
+        , Task.perform Tick Time.now
         ]
     )
 
@@ -43,8 +42,13 @@ kickOff =
     Time.millisToPosix 1578154400000
 
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
+addStrings : String -> String -> String -> String -> String -> String
+addStrings week day hour minute second =
+    week ++ " weeks" ++ " , " ++ day ++ " Days" ++ " , " ++ hour ++ " Hours" ++ " , " ++ minute ++ " Minutes" ++ " and " ++ second ++ " seconds"
+
+
+subscriptions : Sub Msg
+subscriptions =
     Time.every 1000 Tick
 
 
@@ -58,11 +62,6 @@ update msg model =
 
         AdjustTimeZone newZone ->
             ( { model | zone = newZone }
-            , Cmd.none
-            )
-
-        CurrentTime timeNow ->
-            ( { model | time = timeNow }
             , Cmd.none
             )
 
@@ -100,4 +99,4 @@ view model =
         totalWeek =
             totalDay // 7
     in
-    Html.text (String.fromInt totalWeek ++ " weeks" ++ " , " ++ String.fromInt subDayWeek ++ " Days" ++ " , " ++ String.fromInt subHourDay ++ " Hours" ++ " , " ++ String.fromInt subMinuteHour ++ " Minutes" ++ " and " ++ String.fromInt subMinuteSeconds ++ " seconds")
+    Html.text (addStrings (String.fromInt totalWeek) (String.fromInt subDayWeek) (String.fromInt subHourDay) (String.fromInt subMinuteHour) (String.fromInt subMinuteSeconds))
