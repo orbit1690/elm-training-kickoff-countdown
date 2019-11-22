@@ -1,4 +1,4 @@
-module Countdown exposing (Model, init, subscriptions, update, view)
+module Countdown exposing (Model, Msg, init, subscriptions, update, view)
 
 import Browser
 import Html
@@ -42,9 +42,20 @@ kickOff =
     Time.millisToPosix 1578154400000
 
 
-addStrings : String -> String -> String -> String -> String -> String
-addStrings week day hour minute second =
-    week ++ " weeks" ++ " , " ++ day ++ " Days" ++ " , " ++ hour ++ " Hours" ++ " , " ++ minute ++ " Minutes" ++ " and " ++ second ++ " seconds"
+addStrings : { week : Int, day : Int, hour : Int, minute : Int, second : Int } -> String
+addStrings { week, day, hour, minute, second } =
+    String.concat
+        [ String.fromInt week
+        , " weeks, "
+        , String.fromInt day
+        , " days, "
+        , String.fromInt hour
+        , " hours, "
+        , String.fromInt minute
+        , " minutes and "
+        , String.fromInt second
+        , " seconds"
+        ]
 
 
 subscriptions : Sub Msg
@@ -69,34 +80,44 @@ update msg model =
 view : Model -> Html.Html Msg
 view model =
     let
+        timeLeft : Int
         timeLeft =
             Time.posixToMillis kickOff - Time.posixToMillis model.time
 
+        totalSeconds : Int
         totalSeconds =
             timeLeft // 1000
 
+        subMinuteSeconds : Int
         subMinuteSeconds =
             modBy 60 totalSeconds
 
+        totalMinutes : Int
         totalMinutes =
             totalSeconds // 60
 
+        sucMinuteHour : Int
         subMinuteHour =
             modBy 60 totalMinutes
 
+        totalHour : Int
         totalHour =
             totalMinutes // 60
 
+        subHourDay : Int
         subHourDay =
             modBy 24 totalHour
 
+        totalDay : Int
         totalDay =
             totalHour // 24
 
+        subDayWeek : Int
         subDayWeek =
             modBy 7 totalDay
 
+        totalWeek : Int
         totalWeek =
             totalDay // 7
     in
-    Html.text (addStrings (String.fromInt totalWeek) (String.fromInt subDayWeek) (String.fromInt subHourDay) (String.fromInt subMinuteHour) (String.fromInt subMinuteSeconds))
+    Html.text <| addStrings { week = totalWeek, day = subDayWeek, hour = subHourDay, minute = subMinuteHour, second = subMinuteSeconds }
